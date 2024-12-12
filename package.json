@@ -2,7 +2,7 @@
   "name": "markdown-header-autogen",
   "displayName": "Markdown Header AutoGen",
   "description": "AI-powered YAML header generator for Markdown blog posts",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "nosaeorg",
   "engines": {
     "vscode": "^1.85.0"
