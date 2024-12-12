@@ -199,15 +199,15 @@ async function renameFile(oldPath: string, newFileName: string): Promise<{ succe
     }
 }
 
-function removeExistingFrontmatter(document: vscode.TextDocument): { text: string, range?: vscode.Range } {
+function removeExistingHeader(document: vscode.TextDocument): { text: string, range?: vscode.Range } {
     const text = document.getText();
 
-    // Check if document starts with YAML frontmatter
-    const frontmatterRegex = /^---\n[\s\S]+?\n---\n\n/;
-    const match = text.match(frontmatterRegex);
+    // Check if document starts with YAML header
+    const headerRegex = /^---\n[\s\S]+?\n---\n\n/;
+    const match = text.match(headerRegex);
 
     if (match) {
-        // If frontmatter found, return remaining text and range to delete
+        // If header found, return remaining text and range to delete
         const endPosition = document.positionAt(match[0].length);
         return {
             text: text.slice(match[0].length),
@@ -215,7 +215,7 @@ function removeExistingFrontmatter(document: vscode.TextDocument): { text: strin
         };
     }
 
-    // If no frontmatter found, return original text
+    // If no header found, return original text
     return { text };
 }
 
@@ -235,7 +235,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // Get configuration
-        const config = vscode.workspace.getConfiguration('markdown-frontmatter');
+        const config = vscode.workspace.getConfiguration('markdown-header-autogen');
         const author = config.get<string>('author') || '';
         const apiKey = config.get<string>('openai.apiKey');
         const baseURL = config.get<string>('openai.baseURL') || 'https://api.openai.com/v1';
@@ -253,7 +253,7 @@ export function activate(context: vscode.ExtensionContext) {
         try {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
-                title: "Generating Frontmatter",
+                title: "Generating Header...",
                 cancellable: false
             }, async (progress) => {
                 if (!editor) {
@@ -266,7 +266,7 @@ export function activate(context: vscode.ExtensionContext) {
                 const { date, title, isValidFormat } = parseFileName(fileName);
 
                 // Store the content before any operations
-                const { text: contentWithoutFrontmatter, range: frontmatterRange } = removeExistingFrontmatter(editor.document);
+                const { text: contentWithoutHeader, range: headerRange } = removeExistingHeader(editor.document);
 
                 // If filename format is incorrect, prompt user to modify
                 if (!isValidFormat) {
@@ -302,7 +302,7 @@ export function activate(context: vscode.ExtensionContext) {
                 // Generate blog metadata
                 progress.report({ increment: 40, message: "Generating metadata with AI..." });
                 const metadata = await generateBlogMetadata(
-                    contentWithoutFrontmatter,
+                    contentWithoutHeader,
                     apiKey,
                     baseURL,
                     model,
@@ -312,9 +312,9 @@ export function activate(context: vscode.ExtensionContext) {
                     maxTags
                 );
 
-                // Create frontmatter
-                progress.report({ increment: 10, message: "Creating frontmatter..." });
-                const frontmatter = [
+                // Create header
+                progress.report({ increment: 10, message: "Creating header..." });
+                const header = [
                     '---',
                     `title: "${title}"`,
                     `date: ${date || new Date().toISOString().split('T')[0]}`,
@@ -325,20 +325,20 @@ export function activate(context: vscode.ExtensionContext) {
                     '---\n\n'
                 ].join('\n');
 
-                // Insert new frontmatter at document start, delete old if exists
+                // Insert new header at document start, delete old if exists
                 progress.report({ increment: 10, message: "Updating document..." });
                 if (!editor) {
                     throw new Error('Editor not available');
                 }
                 await editor.edit(editBuilder => {
-                    if (frontmatterRange) {
-                        editBuilder.delete(frontmatterRange);
+                    if (headerRange) {
+                        editBuilder.delete(headerRange);
                     }
-                    editBuilder.insert(new vscode.Position(0, 0), frontmatter);
+                    editBuilder.insert(new vscode.Position(0, 0), header);
                 });
             });
 
-            vscode.window.showInformationMessage('Frontmatter generated successfully!');
+            vscode.window.showInformationMessage('Header generated successfully!');
         } catch (error) {
             vscode.window.showErrorMessage('Error generating metadata: ' + (error as Error).message);
         }
