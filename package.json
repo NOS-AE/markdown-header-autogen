@@ -1,0 +1,112 @@
+{
+  "name": "markdown-header-autogen",
+  "displayName": "Markdown Header AutoGen",
+  "description": "AI-powered YAML header generator for Markdown blog posts",
+  "version": "0.0.2",
+  "publisher": "nosaeorg",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "markdown",
+    "autogen",
+    "yaml",
+    "blog",
+    "ai"
+  ],
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nos-ae/markdown-header-autogen"
+  },
+  "license": "MIT",
+  "activationEvents": [
+    "onCommand:markdown-header-autogen.generateHeader"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "markdown-header-autogen.generateHeader",
+        "title": "Generate Markdown Header"
+      }
+    ],
+    "configuration": {
+      "title": "Markdown Header AutoGen",
+      "properties": {
+        "markdown-header-autogen.author": {
+          "type": "string",
+          "default": "",
+          "description": "Default author name for markdown header"
+        },
+        "markdown-header-autogen.openai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Key for generating article descriptions"
+        },
+        "markdown-header-autogen.openai.baseURL": {
+          "type": "string",
+          "default": "https://api.openai.com/v1",
+          "description": "Base URL for OpenAI API. Change this if you're using a different API endpoint"
+        },
+        "markdown-header-autogen.openai.model": {
+          "type": "string",
+          "default": "gpt-3.5-turbo",
+          "enum": [
+            "gpt-3.5-turbo",
+            "gpt-4"
+          ],
+          "description": "OpenAI model to use for generating descriptions"
+        },
+        "markdown-header-autogen.language": {
+          "type": "string",
+          "default": "english",
+          "enum": [
+            "english",
+            "chinese",
+            "japanese"
+          ],
+          "description": "Language to use for generating descriptions"
+        },
+        "markdown-header-autogen.description.maxLength": {
+          "type": "number",
+          "default": 50,
+          "description": "Maximum length of the generated description in characters"
+        },
+        "markdown-header-autogen.categories.maxCount": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Maximum number of categories to generate"
+        },
+        "markdown-header-autogen.tags.maxCount": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Maximum number of tags to generate"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "^16.18.34",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "openai": "^4.0.0"
+  }
+}
